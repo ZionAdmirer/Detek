@@ -1,0 +1,869 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detek | Cloud Data Leak Detection Framework</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #0ea5e9;
+            --accent: #7c3aed;
+            --light: #f8fafc;
+            --dark: #0f172a;
+            --gray: #64748b;
+            --light-gray: #e2e8f0;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --warning: #f59e0b;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        /* Typography */
+        h1, h2, h3, h4, h5 {
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            letter-spacing: -0.025em;
+        }
+        
+        h2 {
+            font-size: 2.25rem;
+            letter-spacing: -0.025em;
+        }
+        
+        h3 {
+            font-size: 1.5rem;
+        }
+        
+        p {
+            margin-bottom: 1.5rem;
+            font-size: 1.125rem;
+        }
+        
+        /* Layout */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        section {
+            padding: 5rem 0;
+        }
+        
+        /* Navigation */
+        nav {
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 2rem;
+        }
+        
+        .logo {
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+        
+        .logo span {
+            color: var(--dark);
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+        
+        .nav-button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .nav-button:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(to right, var(--dark), #1e293b);
+            color: white;
+            padding: 10rem 0 6rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-container {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        .hero h1 {
+            max-width: 800px;
+            font-size: 3.5rem;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, #f0f9ff, #bae6fd);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .hero p {
+            max-width: 600px;
+            font-size: 1.25rem;
+            margin-bottom: 2.5rem;
+            color: var(--light-gray);
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .primary-button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.875rem 2rem;
+            font-weight: 500;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .primary-button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .secondary-button {
+            background-color: transparent;
+            color: white;
+            border: 1px solid white;
+            border-radius: 0.5rem;
+            padding: 0.875rem 2rem;
+            font-weight: 500;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .secondary-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .hero-graphic {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 50%;
+            height: 100%;
+            opacity: 0.2;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(79, 70, 229, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(14, 165, 233, 0.4) 0%, transparent 50%);
+            z-index: 1;
+        }
+        
+        /* Stats Section */
+        .stats {
+            background-color: white;
+            padding: 3rem 0;
+            box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.05);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 1.5rem;
+        }
+        
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            line-height: 1;
+        }
+        
+        .stat-label {
+            color: var(--gray);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        
+        /* Features Section */
+        .features {
+            background-color: var(--light);
+            padding: 6rem 0;
+        }
+        
+        .section-header {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 4rem;
+        }
+        
+        .section-subtitle {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature-icon {
+            background-color: rgba(37, 99, 235, 0.1);
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+        
+        .feature-title {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-description {
+            color: var(--gray);
+            margin-bottom: 0;
+            font-size: 1rem;
+        }
+        
+        /* Architecture Section */
+        .architecture {
+            background-color: white;
+            padding: 6rem 0;
+        }
+        
+        .arch-container {
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+        }
+        
+        .arch-diagram {
+            background-color: var(--light);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .arch-diagram img {
+            width: 100%;
+            height: auto;
+            border-radius: 0.5rem;
+        }
+        
+        .arch-layers {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .arch-layer {
+            background-color: var(--light);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .arch-layer h4 {
+            margin-bottom: 0.75rem;
+            color: var(--dark);
+        }
+        
+        .arch-layer p {
+            margin-bottom: 0;
+            font-size: 0.95rem;
+            color: var(--gray);
+        }
+        
+        /* Results Section */
+        .results {
+            background-color: var(--light);
+            padding: 6rem 0;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .result-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .result-header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1.5rem;
+        }
+        
+        .result-body {
+            padding: 1.5rem;
+        }
+        
+        .result-metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .result-metric:last-child {
+            border-bottom: none;
+        }
+        
+        .metric-name {
+            font-weight: 500;
+        }
+        
+        .metric-value {
+            font-weight: 600;
+        }
+        
+        .metric-improvement {
+            color: var(--success);
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+        
+        /* Call to Action */
+        .cta {
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            color: white;
+            padding: 5rem 0;
+            text-align: center;
+        }
+        
+        .cta h2 {
+            margin-bottom: 1.5rem;
+        }
+        
+        .cta p {
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--dark);
+            color: var(--light-gray);
+            padding: 4rem 0 2rem;
+        }
+        
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+        
+        .footer-brand h3 {
+            font-size: 1.5rem;
+            color: white;
+            margin-bottom: 1rem;
+        }
+        
+        .footer-brand p {
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .footer-links h4 {
+            color: white;
+            margin-bottom: 1.25rem;
+            font-size: 1.125rem;
+        }
+        
+        .footer-link-list {
+            list-style: none;
+        }
+        
+        .footer-link-list li {
+            margin-bottom: 0.75rem;
+        }
+        
+        .footer-link-list a {
+            color: var(--light-gray);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            font-size: 0.95rem;
+        }
+        
+        .footer-link-list a:hover {
+            color: white;
+        }
+        
+        .footer-bottom {
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .footer-bottom p {
+            margin-bottom: 0;
+            font-size: 0.875rem;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .social-link {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .social-link:hover {
+            background-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            h2 {
+                font-size: 2rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .hero {
+                padding: 8rem 0 4rem;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+            }
+            
+            .feature-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="#" class="logo">Detek<span> </span></a>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#architecture">Architecture</a></li>
+                <li><a href="#results">Results</a></li>
+                <li><a href="#about">About</a></li>
+            </ul>
+            <button class="nav-button">Get Started</button>
+        </div>
+    </nav>
+    
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container hero-container">
+            <h1>AI-Driven Real-Time Data Leak Detection for Cloud Environments</h1>
+            <p>A cutting-edge framework leveraging deep learning, natural language processing, and behavioral analytics to detect and prevent data exfiltration in AWS cloud environments.</p>
+            <div class="hero-buttons">
+                <a href="#features" class="primary-button">Explore Features</a>
+                <a href="#paper" class="secondary-button">Read Research Paper</a>
+            </div>
+        </div>
+        <div class="hero-graphic"></div>
+    </section>
+    
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">94.8%</div>
+                    <div class="stat-label">Detection Accuracy</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">3.2%</div>
+                    <div class="stat-label">False Positive Rate</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">47%</div>
+                    <div class="stat-label">Cost Reduction</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">&lt;1s</div>
+                    <div class="stat-label">Detection Latency</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-subtitle">Key Capabilities</div>
+                <h2>Advanced Protection Against Modern Data Leak Vectors</h2>
+                <p>Our framework combines multiple detection methods to identify both known and zero-day exfiltration attempts across hybrid cloud infrastructures.</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">AI</div>
+                    <h3 class="feature-title">AI-Powered Detection</h3>
+                    <p class="feature-description">Leverages deep learning models and NLP to identify sensitive data patterns and anomalous exfiltration behaviors.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3 class="feature-title">Real-Time Protection</h3>
+                    <p class="feature-description">Sub-second detection and response capabilities prevent data leaks before significant volumes are compromised.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3 class="feature-title">Adaptive Learning</h3>
+                    <p class="feature-description">Continuously evolves with emerging threats through automated model retraining and threat intelligence integration.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">☁️</div>
+                    <h3 class="feature-title">Cloud-Native Architecture</h3>
+                    <p class="feature-description">Built on AWS serverless services for elastic scalability, resilience, and cost-effective operation.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🧠</div>
+                    <h3 class="feature-title">Contextual Intelligence</h3>
+                    <p class="feature-description">Distinguishes between legitimate business processes and malicious activities through contextual analysis.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <h3 class="feature-title">Automated Response</h3>
+                    <p class="feature-description">Graduated intervention strategies from alerting to active containment based on confidence scores.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Architecture Section -->
+    <section class="architecture" id="architecture">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-subtitle">System Design</div>
+                <h2>A Layered Defense Framework</h2>
+                <p>Our solution employs a comprehensive five-tier architecture built on AWS services to provide defense in depth against data exfiltration.</p>
+            </div>
+            
+            <div class="arch-container">
+                <div class="arch-diagram">
+                    <img src="/api/placeholder/1000/500" alt="Fyne AI Architecture Diagram">
+                </div>
+                
+                <div class="arch-layers">
+                    <div class="arch-layer">
+                        <h4>Data Collection Tier</h4>
+                        <p>Captures diverse telemetry from network flows, service logs, application metrics, and content analyzers across AWS environments.</p>
+                    </div>
+                    
+                    <div class="arch-layer">
+                        <h4>Processing Tier</h4>
+                        <p>Transforms raw telemetry into structured features through real-time serverless pipelines using Kinesis and Lambda.</p>
+                    </div>
+                    
+                    <div class="arch-layer">
+                        <h4>Analysis Tier</h4>
+                        <p>Applies specialized AI models through SageMaker for content classification, behavioral analysis, and contextual intelligence.</p>
+                    </div>
+                    
+                    <div class="arch-layer">
+                        <h4>Orchestration Tier</h4>
+                        <p>Coordinates automated responses through EventBridge and Step Functions for consistent incident management.</p>
+                    </div>
+                    
+                    <div class="arch-layer">
+                        <h4>Management Tier</h4>
+                        <p>Provides visibility, governance, and continuous improvement through comprehensive dashboards and feedback loops.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Results Section -->
+    <section class="results" id="results">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-subtitle">Performance Metrics</div>
+                <h2>Superior Protection with Proven Results</h2>
+                <p>Extensive evaluation across multiple industry sectors demonstrates significant improvements over traditional approaches.</p>
+            </div>
+            
+            <div class="results-grid">
+                <div class="result-card">
+                    <div class="result-header">
+                        <h3>Detection Effectiveness</h3>
+                    </div>
+                    <div class="result-body">
+                        <div class="result-metric">
+                            <div class="metric-name">Detection Rate</div>
+                            <div class="metric-value">94.8% <span class="metric-improvement">+18.5%</span></div>
+                        </div>
+                        <div class="result-metric">
+                            <div class="metric-name">False Positive Rate</div>
+                            <div class="metric-value">3.2% <span class="metric-improvement">-15.5%</span></div>
+                        </div>
+                        <div class="result-metric">
+                            <div class="metric-name">F1 Score</div>
+                            <div class="metric-value">0.957 <span class="metric-improvement">+0.234</span></div>
+                        </div>
+                        <div class="result-metric">
+                            <div class="metric-name">Zero-Day Detection</div>
+                            <div class="metric-value">82.7% <span class="metric-improvement">+48.5%</span></div>
+                        </div>
+                        <div class="result-metric">
+                            <div class="metric-name">Coverage</div>
+                            <div class="metric-value">11/12 vectors <span class="metric-improvement">+33.3%</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <div class="result-header">
+                        <h3>Operational Performance</h3>
+                    </div>
+                    <div class="result-body">
+                        <div class="result-metric">
+                            <div class="metric-name">Detection Latency</div>
+                            <div class="metric-value">0.8 seconds <span class="metric-improvement">-99.9%</span></div>
+                        </div>
+                        <div class="result-metric">
+                            <div class="metric-name">Max Throughput</div>
+                            <div class="metric-value">128 GB/s <span class="metric-improvement">+265.7%</span></div>
+                        </div>
+                        <div class="result-metric">
+                            <div class="metric-name">Resource Utilization</div>
+                            <div class="metric-value">42% <span class="metric-improvement">-51.7%</span></div>
+                        </div>
+                        <div class="result-metric">
+                            <div class="metric-name">Scaling Limit</div>
+                            <div class="metric-value">Linear scaling <span class="metric-improvement">Unlimited</span></div>
+                        </div>
+                        <div class="result-metric">
+                            <div class="metric-name">Deployment Time</div>
+                            <div class="metric-value">3-5 days <span class="metric-improvement">-89.3%</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <div class="result-header">
+                        <h3>Economic Impact</h3>
+                    </div>
+                    <div class="result-body">
+                        <div class="result-metric">
+                            <div class="metric-name">Implementation Cost</div>
+                            <div class="metric-value">$310K <span class="metric-improvement">-74.2%</span></div>
+                        </div>
+                        <div class="result-metric">
+                            <div class="metric-name">Annual Operating Cost</div>
+                            <div class="metric-value">$275K <span class="metric-improvement">-66.5%</span></div>
+                        </div>
+                        <div class="result-metric">
+                            <div class="metric-name">Management Overhead</div>
+                            <div class="metric-value">0.8 FTE <span class="metric-improvement">-75.0%</span></div>
+                        </div>
+                        <div class="result-metric">
+                            <div class="metric-name">Breach Prevention</div>
+                            <div class="metric-value">$8.7M <span class="metric-improvement">+171.9%</span></div>
+                        </div>
+                        <div class="result-metric">
+                            <div class="metric-name">Total ROI (3-year)</div>
+                            <div class="metric-value">478% <span class="metric-improvement">+351%</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Call to Action -->
+    <section class="cta">
+        <div class="container">
+            <h2>Transform Your Cloud Data Protection Strategy</h2>
+            <p>Deploy an intelligent, adaptive defense system that evolves with emerging threats while reducing costs and operational overhead.</p>
+            <a href="#contact" class="primary-button">Request Demo</a>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h3>Detek</h3>
+                    <p>Next-generation data leak detection for modern cloud environments, powered by artificial intelligence and serverless architecture.</p>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Solution</h4>
+                    <ul class="footer-link-list">
+                        <li><a href="#">Features</a></li>
+                        <li><a href="#">Architecture</a></li>
+                        <li><a href="#">Implementation</a></li>
+                        <li><a href="#">Case Studies</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Resources</h4>
+                    <ul class="footer-link-list">
+                        <li><a href="#">Research Paper</a></li>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Webinars</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Company</h4>
+                    <ul class="footer-link-list">
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Team</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Careers</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>© 2025 Detek. All rights reserved.</p>
+                <div class="social-links">
+                    <a href="#" class="social-link">L</a>
+                    <a href="#" class="social-link">T</a>
+                    <a href="#" class="social-link">G</a>
+                    <a href="#" class="social-link">Y</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
